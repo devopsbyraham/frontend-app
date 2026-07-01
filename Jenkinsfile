@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "rahamshaik/frontend"
-        IMAGE_TAG = "v1.0.${BUILD_NUMBER}"
-        APP_NAME = "frontend"
+        IMAGE_NAME    = "rahamshaik/frontend"
+        IMAGE_TAG     = "v1.0.${BUILD_NUMBER}"
+        APP_NAME      = "frontend"
 
-        // Replace with your actual ArgoCD server
-        ARGOCD_SERVER = "localhost:8080"
+        // Change this to your master node IP
+        ARGOCD_SERVER = "44.202.179.140:32624"
     }
 
     stages {
@@ -21,15 +21,14 @@ pipeline {
                         passwordVariable: 'DOCKER_PASS'
                     )
                 ]) {
-
                     sh '''
-                    docker build -t $IMAGE_NAME:$IMAGE_TAG .
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
-                    echo $DOCKER_PASS | docker login \
-                        -u $DOCKER_USER \
-                        --password-stdin
+                    echo "$DOCKER_PASS" | docker login \
+                      -u "$DOCKER_USER" \
+                      --password-stdin
 
-                    docker push $IMAGE_NAME:$IMAGE_TAG
+                    docker push ${IMAGE_NAME}:${IMAGE_TAG}
                     '''
                 }
             }
@@ -43,7 +42,6 @@ pipeline {
                         variable: 'GIT_TOKEN'
                     )
                 ]) {
-
                     sh '''
                     rm -rf k8s-config
 
@@ -54,11 +52,11 @@ pipeline {
                     git config user.email "jenkins@bot.com"
                     git config user.name "jenkins-bot"
 
-                    sed -i "s|image: .*|image: $IMAGE_NAME:$IMAGE_TAG|g" frontend/deployment.yaml
+                    sed -i "s|image: .*|image: ${IMAGE_NAME}:${IMAGE_TAG}|g" frontend/deployment.yaml
 
                     git add frontend/deployment.yaml
 
-                    git commit -m "Update image to $IMAGE_TAG" || true
+                    git commit -m "Update image to ${IMAGE_TAG}" || true
 
                     git push origin main
                     '''
@@ -74,19 +72,20 @@ pipeline {
                         variable: 'ARGOCD_TOKEN'
                     )
                 ]) {
-
                     sh '''
-                      argocd app sync $APP_NAME \
-                         --server $ARGOCD_SERVER \
-                         --auth-token $ARGOCD_TOKEN \
-                         --plaintext \
-                         --grpc-web
+                    argocd app sync ${APP_NAME} \
+                      --server ${ARGOCD_SERVER} \
+                      --auth-token ${ARGOCD_TOKEN} \
+                      --grpc-web \
+                      --insecure
 
-                    argocd app wait $APP_NAME \
-                       --server $ARGOCD_SERVER \
-                       --auth-token $ARGOCD_TOKEN \
-                       --plaintext \
-                       --grpc-web
+                    argocd app wait ${APP_NAME} \
+                      --server ${ARGOCD_SERVER} \
+                      --auth-token ${ARGOCD_TOKEN} \
+                      --grpc-web \
+                      --insecure \
+                      --health \
+                      --timeout 300
                     '''
                 }
             }
@@ -94,13 +93,12 @@ pipeline {
     }
 
     post {
-
         success {
-            echo 'Pipeline completed successfully'
+            echo "Pipeline completed successfully."
         }
 
         failure {
-            echo 'Pipeline failed'
+            echo "Pipeline failed."
         }
 
         always {
