@@ -7,7 +7,7 @@ pipeline {
         APP_NAME      = "frontend"
 
         // Change this to your master node IP
-        ARGOCD_SERVER = "44.202.179.140:32624"
+        ARGOCD_SERVER = "13.201.56.190:31284"
     }
 
     stages {
