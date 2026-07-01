@@ -76,15 +76,17 @@ pipeline {
                 ]) {
 
                     sh '''
-                    argocd app sync $APP_NAME \
-                        --auth-token $ARGOCD_TOKEN \
-                        --server $ARGOCD_SERVER \
-                        --insecure
+                      argocd app sync $APP_NAME \
+                         --server $ARGOCD_SERVER \
+                         --auth-token $ARGOCD_TOKEN \
+                         --plaintext \
+                         --grpc-web
 
                     argocd app wait $APP_NAME \
-                        --auth-token $ARGOCD_TOKEN \
-                        --server $ARGOCD_SERVER \
-                        --insecure
+                       --server $ARGOCD_SERVER \
+                       --auth-token $ARGOCD_TOKEN \
+                       --plaintext \
+                       --grpc-web
                     '''
                 }
             }
