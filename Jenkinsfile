@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "raj0pro/frontend"
+        IMAGE_NAME = "rahamshaik/frontend"
         IMAGE_TAG = "v1.0.${BUILD_NUMBER}"
         APP_NAME = "frontend"
 
         // Replace with your actual ArgoCD server
-        ARGOCD_SERVER = "localhost:9090"
+        ARGOCD_SERVER = "localhost:8080"
     }
 
     stages {
@@ -47,7 +47,7 @@ pipeline {
                     sh '''
                     rm -rf k8s-config
 
-                    git clone https://${GIT_TOKEN}@github.com/Raj-pro/k8s-config.git
+                    git clone https://${GIT_TOKEN}@github.com/devopsbyraham/k8s-config.git
 
                     cd k8s-config
 
